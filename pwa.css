@@ -49,7 +49,7 @@ margin-right: 0;
 }
 
 .install-btn-accent {
-background-color: var(--theme-accent, #7c5cfc);
+background-color: var(--theme-accent, #eab308);
 }
 
 .install-btn-accent:hover {

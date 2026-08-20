@@ -1,12 +1,12 @@
-const CACHE_NAME = 'squishler-pwa-v1';
+const CACHE_NAME = 'zuma-pwa-v1';
 const ASSETS = [
     './',
     './index.css',
-    './index.html',
     './index.js',
     './manifest.json',
-    './pwa.css',
+    './index.html',
     './pwa.js',
+    './pwa.css',
     './sw.js'
 ];
 
