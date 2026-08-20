@@ -1,8 +1,9 @@
-const CACHE_NAME = 'squishy-pwa-v1';
+const CACHE_NAME = 'squishy-pwa-v2';
 const ASSETS = [
     './',
     './index.html',
     './pwa.css',
+    './pwa.js',
     './index.js',
     './manifest.json'
 ];

@@ -1,65 +1,3 @@
-// Register Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-            .catch(err => console.log('SW registration failed:', err));
-    });
-}
-
-// Global PWA Install Prompt Handler
-let deferredPrompt = null;
-
-function injectInstallPrompt() {
-    const card = document.createElement('div');
-    card.id = 'pwa-install-card';
-    card.className = 'pwa-card pwa-card-hidden';
-    card.innerHTML = `
-        <div class="pwa-card-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-        </div>
-        <div class="pwa-card-content">
-            <div class="pwa-card-title">Install Squishy</div>
-            <div class="pwa-card-desc">Add to home screen for offline play.</div>
-        </div>
-        <div class="pwa-card-actions">
-            <button id="pwa-install-btn" class="pwa-btn pwa-btn-primary">Install</button>
-            <button id="pwa-dismiss-btn" class="pwa-btn pwa-btn-close" aria-label="Dismiss">&times;</button>
-        </div>
-    `;
-    document.body.appendChild(card);
-
-    const installBtn = document.getElementById('pwa-install-btn');
-    const dismissBtn = document.getElementById('pwa-dismiss-btn');
-
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            card.classList.add('pwa-card-hidden');
-        }
-        deferredPrompt = null;
-    });
-
-    dismissBtn.addEventListener('click', () => {
-        card.classList.add('pwa-card-hidden');
-    });
-}
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const card = document.getElementById('pwa-install-card');
-    if (card) {
-        card.classList.remove('pwa-card-hidden');
-    }
-});
-
-// Spring Soft-Body Physics Implementation
 class SquishyBall {
     constructor(x, y, radius, color) {
         this.x = x;
@@ -169,14 +107,13 @@ class SquishyBall {
     }
 }
 
-// Canvas Setup and Main Loop
 window.addEventListener('DOMContentLoaded', () => {
-    injectInstallPrompt();
-
     const canvas = document.getElementById('physics-canvas');
+    if (!canvas) return;
+
     const ctx = canvas.getContext('2d');
     const balls = [];
-    const colors = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+    const colors = ['#7c5cfc', '#38bdf8', '#34d399', '#fbbf24', '#f43f5e', '#a855f7'];
 
     function resize() {
         canvas.width = window.innerWidth;
@@ -192,7 +129,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (balls.length > 25) balls.shift();
     }
 
-    // Initial balls
+    // Spawn initial balls
     spawnBall(window.innerWidth / 2 - 50, 100);
     spawnBall(window.innerWidth / 2 + 50, 150);
 
