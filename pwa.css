@@ -17,6 +17,7 @@ top: auto;
 margin-left: auto;
 margin-right: auto;
 transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+
 }
 
 .install-app-modal.hidden-prompt {
@@ -25,7 +26,6 @@ pointer-events: none;
 transform: translateY(20px);
 }
 
-/* Tablet Breakpoint (768px - 1023px): Floating bottom-right */
 @media (min-width: 768px) and (max-width: 1023px) {
 .install-app-modal {
 bottom: 0.5em;
@@ -37,7 +37,6 @@ margin-right: 0;
 }
 }
 
-/* Desktop Breakpoint (>= 1024px): Floating top-right */
 @media (min-width: 1024px) {
 .install-app-modal {
 top: 0.5em;
@@ -49,7 +48,6 @@ margin-right: 0;
 }
 }
 
-/* Accent Button Dynamics */
 .install-btn-accent {
 background-color: var(--theme-accent, #7c5cfc);
 }

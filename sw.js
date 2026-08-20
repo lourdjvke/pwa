@@ -1,11 +1,13 @@
-const CACHE_NAME = 'squishy-pwa-v2';
+const CACHE_NAME = 'squishler-pwa-v1';
 const ASSETS = [
     './',
+    './index.css',
     './index.html',
+    './index.js',
+    './manifest.json',
     './pwa.css',
     './pwa.js',
-    './index.js',
-    './manifest.json'
+    './sw.js'
 ];
 
 self.addEventListener('install', (event) => {

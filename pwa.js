@@ -20,17 +20,15 @@ function injectPWAModal() {
         aria-describedby="modalDesc"
         class="install-app-modal hidden-prompt bg-[#181824] border border-slate-800 rounded-3xl overflow-hidden flex flex-col"
       >
-        <!-- Container to cap height, center image, and cut off excess height -->
         <div class="w-full h-32 bg-slate-900 overflow-hidden flex items-center justify-center relative">
           <img 
-            src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRUzcvqL4QXYlyIpbm1Uaa7BXpYpQmBCTTGla1EKUECKB0zhtJx" 
+            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzI1NjNlYiIvPjwvc3ZnPg==" 
             alt="App Preview Header"
             class="w-full h-full object-cover object-center pointer-events-none select-none"
             onerror="this.src='https://placehold.co/600x300/181824/7c5cfc?text=Install+App'"
           />
         </div>
 
-        <!-- Inner Content Padding & Alignment -->
         <div class="p-6 text-center flex flex-col items-center">
           <h3 id="modalTitle" class="text-xl font-bold text-white mb-2 tracking-tight">
             Install App
@@ -40,7 +38,6 @@ function injectPWAModal() {
             Supercharge your experience with quick desktop access, offline capabilities, instant push notifications, and seamless performance!
           </p>
 
-          <!-- Action Buttons -->
           <div class="w-full space-y-2">
             <button 
               id="installBtn"
