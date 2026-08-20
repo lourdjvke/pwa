@@ -31,7 +31,7 @@ function injectPWAModal() {
 
         <div class="p-6 text-center flex flex-col items-center">
           <h3 id="modalTitle" class="text-xl font-bold text-white mb-2 tracking-tight">
-            Install App
+            Install Squishler
           </h3>
 
           <p id="modalDesc" class="text-xs text-slate-400 leading-relaxed mb-6 px-1">
