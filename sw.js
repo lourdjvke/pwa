@@ -1,12 +1,11 @@
-const CACHE_NAME = 'zuma-pwa-v1';
+const CACHE_NAME = 'ludo-star---fullscreen-mobile-experience-pwa-v1';
 const ASSETS = [
     './',
-    './index.css',
-    './index.js',
     './manifest.json',
     './index.html',
-    './pwa.js',
+    './9666877.png',
     './pwa.css',
+    './pwa.js',
     './sw.js'
 ];
 

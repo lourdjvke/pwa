@@ -14,7 +14,7 @@ function injectPWAModal() {
     modalWrapper.innerHTML = `
       <div 
         id="installModal"
-        aria-color="#eab308"
+        aria-color="#22c55e"
         role="dialog"
         aria-labelledby="modalTitle"
         aria-describedby="modalDesc"
@@ -22,16 +22,16 @@ function injectPWAModal() {
       >
         <div class="w-full h-32 bg-slate-900 overflow-hidden flex items-center justify-center relative">
           <img 
-            src="./zuma.jpg" 
+            src="././9666877.png" 
             alt="App Preview Header"
             class="w-full h-full object-cover object-center pointer-events-none select-none"
-            onerror="this.src='https://placehold.co/600x300/181824/eab308?text=Install+App'"
+            onerror="this.src='https://placehold.co/600x300/181824/22c55e?text=Install+App'"
           />
         </div>
 
         <div class="p-6 text-center flex flex-col items-center">
           <h3 id="modalTitle" class="text-xl font-bold text-white mb-2 tracking-tight">
-            Install Zuma
+            Install App
           </h3>
 
           <p id="modalDesc" class="text-xs text-slate-400 leading-relaxed mb-6 px-1">

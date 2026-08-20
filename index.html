@@ -1,61 +1,653 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full w-full overflow-hidden select-none">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Squishy Balls PWA</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="manifest.json">
-    <!-- Reusable PWA Stylesheet -->
-    <link rel="stylesheet" href="pwa.css">
-    
-    <style>
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
-            background-color: #0d0f17;
-            font-family: 'Inter', sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
-        }
-        #instruction-hint {
-            position: absolute;
-            top: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #94a3b8;
-            pointer-events: none;
-            z-index: 10;
-        }
-        #physics-canvas {
-            display: block;
-            width: 100vw;
-            height: 100vh;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div id="instruction-hint">Tap or drag to spawn squishy balls</div>
-    <canvas id="physics-canvas"></canvas>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>LUDO STAR - Fullscreen Mobile Experience</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Space+Grotesk:wght@700;800;900&family=Syne:wght@800;900&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Independent Modular PWA Script -->
-    <script src="pwa.js" defer></script>
-    <!-- Main Ball Simulation Script -->
-    <script src="index.js" defer></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#FF3B00',
+            brandDark: '#D63200',
+            accentYellow: '#FFE600',
+            bgDark: '#0D0D11',
+          },
+          fontFamily: {
+            syne: ['Syne', 'sans-serif'],
+            space: ['Space Grotesk', 'sans-serif'],
+            outfit: ['Outfit', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Prevent all scrolling, pinch zooming, and text selection */
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+      background-color: #FF3B00;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    /* Spring physics cubic bezier timing */
+    .spring-trans {
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    }
+
+    .spring-btn {
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+    .spring-btn:active {
+      transform: scale(0.93) translateY(2px);
+      box-shadow: 1px 1px 0px #000 !important;
+    }
+
+    /* Retro brutalist pop shadows & text strokes */
+    .pop-stroke-yellow {
+      color: #FFE600;
+      text-shadow: 
+        3px 3px 0px #000000,
+        -1px -1px 0 #000,  
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
+    }
+
+    .pop-stroke-black {
+      color: #000000;
+      text-shadow: 2px 2px 0px #FFFFFF;
+    }
+
+    /* Blend filter to treat white image backgrounds cleanly */
+    .blend-multiply {
+      mix-blend-mode: multiply;
+      filter: contrast(115%) brightness(102%);
+    }
+
+    /* Pulse animation */
+    @keyframes pulseSoft {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    .pulse-anim {
+      animation: pulseSoft 2s infinite ease-in-out;
+    }
+
+    /* Floating retro dice animation */
+    @keyframes floatRetro {
+      0%, 100% { transform: translateY(0px) rotate(-3deg); }
+      50% { transform: translateY(-7px) rotate(4deg); }
+    }
+    .float-anim {
+      animation: floatRetro 2.8s ease-in-out infinite;
+    }
+
+    /* Hide Webkit scrollbars completely */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+  <link rel="stylesheet" href="./pwa.css">
+  <link rel="manifest" href="./manifest.json">
+</head>
+
+<body class="w-full h-full h-[100dvh] bg-brand text-black overflow-hidden flex flex-col justify-between relative">
+
+  <aside id="desktopWarning" class="fixed inset-0 bg-[#0D0D11] text-white z-50 hidden flex-col items-center justify-center p-6 text-center select-none">
+    <div class="bg-brand rounded-3xl border-4 border-white p-8 max-w-md w-full shadow-[8px_8px_0px_#FFE600] flex flex-col items-center">
+      <div class="w-16 h-16 rounded-full bg-accentYellow text-black text-3xl flex items-center justify-center font-black mb-4 border-2 border-black animate-bounce">
+        <i class="fa-solid fa-mobile-screen"></i>
+      </div>
+      <h2 class="font-syne text-3xl font-black uppercase leading-tight mb-2 text-white">
+        MOBILE VIEW ONLY
+      </h2>
+      <p class="text-sm font-bold text-gray-200 mb-6 leading-relaxed">
+        This full-screen app is optimized exclusively for mobile viewports! Please shrink your browser window width under <span class="text-accentYellow font-black">500px</span> or open on a mobile device.
+      </p>
+      <div class="w-full bg-black/60 rounded-xl p-3 border border-white/20 text-xs font-mono mb-4 text-accentYellow flex justify-between items-center">
+        <span>CURRENT WIDTH:</span>
+        <span id="windowWidthVal" class="font-bold">1024px</span>
+      </div>
+      <button onclick="forceMobilePreview()" class="w-full bg-accentYellow text-black font-black text-xs uppercase py-3 rounded-2xl border-2 border-black shadow-[3px_3px_0px_#000] spring-btn cursor-pointer hover:bg-white">
+        FORCE MOBILE SIMULATION <i class="fa-solid fa-play ml-1"></i>
+      </button>
+    </div>
+  </aside>
+
+  <header class="absolute top-0 left-0 right-0 z-40 px-4 pt-3 pb-1 flex justify-between items-center pointer-events-none">
+    <div class="pointer-events-auto bg-black/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 flex items-center gap-2 shadow-lg">
+      <span class="w-2.5 h-2.5 rounded-full bg-brand animate-ping"></span>
+      <span class="font-syne text-xs font-black text-white tracking-wide">
+        LUDO<span class="text-brand">STAR</span>
+      </span>
+    </div>
+
+    <!-- Sound Toggle Button -->
+    <button id="audioBtn" onclick="toggleSound()" class="pointer-events-auto w-9 h-9 rounded-full bg-black/80 text-white border border-white/20 flex items-center justify-center spring-btn shadow-lg cursor-pointer hover:bg-brand">
+      <i id="audioIcon" class="fa-solid fa-volume-xmark text-xs"></i>
+    </button>
+  </header>
+
+
+  <main id="appContainer" class="w-full h-full h-[100dvh] flex-1 relative overflow-hidden touch-none cursor-grab active:cursor-grabbing">
+    
+    <!-- CAROUSEL TRACK (Strictly 300vw to prevent flex shrinking bugs) -->
+    <div id="slideTrack" style="width: 300vw;" class="h-full flex transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)]">
+
+      <!-- ========================================================= -->
+      <!-- ================= SCREEN 1: LUDO STAR HUB ================ -->
+      <!-- ========================================================= -->
+      <section style="width: 100vw;" class="h-full h-[100dvh] flex-shrink-0 flex flex-col justify-between relative bg-brand overflow-hidden p-4 pt-12">
+        
+        <!-- Background retro starburst floating graphic -->
+        <div class="absolute top-16 right-4 opacity-15 pointer-events-none float-anim">
+          <svg width="100" height="100" viewBox="0 0 100 100" fill="black">
+            <polygon points="50,0 63,37 100,50 63,63 50,100 37,63 0,50 37,37"/>
+          </svg>
+        </div>
+
+        <!-- TOP 20% SCALLOPED WHITE CLOUD HEADER -->
+        <div class="relative w-full z-20">
+          <div class="relative bg-white rounded-[32px] p-5 border-4 border-black shadow-[5px_5px_0px_#000] text-center pointer-events-none">
+            
+            <!-- Organic White Circle Bumps at top of cloud -->
+            <div class="absolute -top-3 left-6 w-8 h-8 bg-white rounded-full border-t-4 border-l-4 border-black"></div>
+            <div class="absolute -top-5 left-1/2 -translate-x-1/2 w-12 h-12 bg-white rounded-full border-t-4 border-black"></div>
+            <div class="absolute -top-3 right-6 w-8 h-8 bg-white rounded-full border-t-4 border-r-4 border-black"></div>
+
+            <div class="text-[10px] font-black uppercase tracking-widest text-brand mb-0.5">THE #1 BOARD GAME</div>
+            <h1 class="font-syne text-[40px] leading-[0.88] font-black tracking-tight text-black uppercase">
+              LUDO<br>
+              <span class="text-brand">STAR.</span>
+            </h1>
+
+            <!-- Bottom speech point bubble pointer -->
+            <div class="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-5 h-5 bg-white rotate-45 border-r-4 border-b-4 border-black"></div>
+          </div>
+        </div>
+
+        <!-- CENTER HERO IMAGE AREA - FULL CONTAINER FILL -->
+        <div class="flex-1 w-full my-2 relative flex items-center justify-center overflow-hidden pointer-events-none">
+          
+          <!-- Subtle white burst background card -->
+          <div class="absolute inset-1 bg-white/90 rounded-3xl border-4 border-black shadow-[4px_4px_0px_#000] flex items-center justify-center overflow-hidden">
+            <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#000_1.5px,transparent_1.5px)] [background-size:14px_14px]"></div>
+          </div>
+
+          <!-- Ludo Mascot Main Image Filling the Container -->
+          <div class="relative z-10 w-full h-full p-2 flex items-center justify-center">
+            <img src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTyq2hQQo5SwF1bbVvd6hBZhsvNBlY5scNRvdHrTkL4ObI8At3A" 
+                 alt="Ludo Mascot Illustration" 
+                 class="w-full h-full object-contain blend-multiply pointer-events-none drop-shadow-[0_8px_0_rgba(0,0,0,0.12)]">
+          </div>
+
+          <!-- Floating Rubberhose Badges -->
+          <div class="absolute top-3 left-3 z-20 bg-accentYellow text-black font-black text-xs px-3 py-1.5 rounded-full border-2 border-black shadow-[2px_2px_0px_#000] float-anim flex items-center gap-1.5">
+            <i class="fa-solid fa-dice-six text-sm"></i> ROLL 6 TO WIN!
+          </div>
+
+          <div class="absolute bottom-4 right-3 z-20 bg-white text-black font-black text-[11px] px-3 py-1.5 rounded-full border-2 border-black shadow-[2px_2px_0px_#000] rotate-[5deg]">
+            🔥 2.4M ONLINE
+          </div>
+        </div>
+
+        <!-- BOTTOM ACTION CAPSULE BAR -->
+        <div class="w-full flex justify-between items-center z-20 pb-2">
+          <div class="bg-black text-white text-xs font-black px-3.5 py-2 rounded-full border-2 border-white flex items-center gap-2 pointer-events-none">
+            <span class="w-2 h-2 rounded-full bg-accentYellow animate-pulse"></span>
+            SEASON 12
+          </div>
+
+          <button onclick="goToSlide(1)" class="bg-white hover:bg-accentYellow text-black font-black text-xs uppercase px-6 py-3 rounded-full border-3 border-black shadow-[4px_4px_0px_#000] spring-btn flex items-center gap-2 cursor-pointer z-30">
+            DISCOVER <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </div>
+
+      </section>
+
+
+      <!-- ========================================================= -->
+      <!-- ============ SCREEN 2: GAME MODES (QUICK & COMBAT) ====== -->
+      <!-- ========================================================= -->
+      <section style="width: 100vw;" class="h-full h-[100dvh] flex-shrink-0 flex flex-col justify-between relative bg-brand overflow-hidden p-3 pt-12">
+        
+        <!-- MAIN WHITE CONTAINER CARD -->
+        <div class="w-full h-full bg-white rounded-[32px] border-4 border-black p-3 flex flex-col justify-between shadow-[6px_6px_0px_#000] overflow-hidden pointer-events-none">
+          
+          <!-- TOP CARD: QUICK LUDO (ORANGE CARD WITH OVERLAPPING CIRCLES) -->
+          <div onclick="openModal('QUICK LUDO')" class="pointer-events-auto flex-1 bg-brand rounded-2xl border-3 border-black p-3 mb-2 flex flex-col justify-between relative overflow-hidden cursor-pointer spring-btn group">
+            
+            <!-- Top Header info tags -->
+            <div class="flex justify-between items-center text-[10px] font-black uppercase text-black z-10">
+              <span class="bg-white px-2.5 py-0.5 rounded-full border border-black">73 MATCHES</span>
+              <span class="bg-accentYellow px-2.5 py-0.5 rounded-full border border-black">FAST PACED</span>
+            </div>
+
+            <!-- Card Title -->
+            <div class="z-10 mt-1">
+              <h2 class="font-syne text-2xl font-black uppercase leading-none text-black">
+                QUICK<br>
+                <span class="text-white pop-stroke-black">LUDO STAR.</span>
+              </h2>
+            </div>
+
+            <!-- Gamepad Image Filling Lower Half with Overlapping Orange Scallop Circle Transition -->
+            <div class="relative w-full h-28 mt-1 z-0 overflow-hidden rounded-xl bg-white border-2 border-black">
+              
+              <!-- TOP CIRCULAR SCALLOP MERGES -->
+              <div class="absolute -top-3 left-2 w-8 h-8 rounded-full bg-brand z-10"></div>
+              <div class="absolute -top-4 left-1/4 w-10 h-10 rounded-full bg-brand z-10"></div>
+              <div class="absolute -top-3 left-1/2 w-9 h-9 rounded-full bg-brand z-10"></div>
+              <div class="absolute -top-4 right-1/4 w-10 h-10 rounded-full bg-brand z-10"></div>
+              <div class="absolute -top-3 right-2 w-8 h-8 rounded-full bg-brand z-10"></div>
+
+              <!-- Gamepad Image Fill -->
+              <img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSHMGoaNnqcYEs1kMr1qKqlHAp22Ylld0wLwbExbRmMaL2IPvj6" 
+                   alt="Gamepad Illustration" 
+                   class="w-full h-full object-contain blend-multiply filter contrast-125 pt-1 group-hover:scale-105 transition-transform duration-300">
+            </div>
+
+            <!-- Bottom Button Trigger -->
+            <div class="z-10 flex justify-start mt-1">
+              <span class="text-[10px] font-black bg-black text-white px-3 py-1 rounded-full border border-black flex items-center gap-1 group-hover:bg-accentYellow group-hover:text-black transition-colors">
+                DETAILS <i class="fa-solid fa-circle-arrow-right text-xs"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- BOTTOM CARD: COMBAT LUDO (WHITE CARD WITH SCALLOPS) -->
+          <div onclick="openModal('COMBAT LUDO')" class="pointer-events-auto flex-1 bg-white rounded-2xl border-3 border-black p-3 flex flex-col justify-between relative overflow-hidden cursor-pointer spring-btn group">
+            
+            <!-- Top Header info tags -->
+            <div class="flex justify-between items-center text-[10px] font-black uppercase text-black z-10">
+              <span class="bg-brand text-white px-2.5 py-0.5 rounded-full border border-black">81 DUELS</span>
+              <span class="bg-black text-white px-2.5 py-0.5 rounded-full">ONE ON ONE</span>
+            </div>
+
+            <!-- Card Title -->
+            <div class="z-10 mt-1">
+              <h2 class="font-syne text-2xl font-black uppercase leading-none text-black">
+                Combat<br>
+                <span class="text-brand">LUDO ARENA.</span>
+              </h2>
+            </div>
+
+            <!-- Handshake Combat Image Container Fill -->
+            <div class="relative w-full h-28 mt-1 z-0 overflow-hidden rounded-xl bg-gray-50 border-2 border-black flex items-center justify-center">
+              
+              <!-- Circular Scallop Edge Merges at top -->
+              <div class="absolute -top-3 left-4 w-7 h-7 rounded-full bg-white border-b-2 border-black z-10"></div>
+              <div class="absolute -top-4 left-1/3 w-9 h-9 rounded-full bg-white border-b-2 border-black z-10"></div>
+              <div class="absolute -top-3 right-4 w-7 h-7 rounded-full bg-white border-b-2 border-black z-10"></div>
+
+              <img src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRcZ2h70-fZBZ_HgpwLPk4yN5Bq1vOUQ5O-FHJKczKLnGniEvGr" 
+                   alt="Combat Handshake Illustration" 
+                   class="w-full h-full object-contain blend-multiply filter contrast-125 group-hover:scale-105 transition-transform duration-300">
+            </div>
+
+            <!-- Bottom Button Trigger -->
+            <div class="z-10 flex justify-start mt-1">
+              <span class="text-[10px] font-black bg-brand text-white px-3 py-1 rounded-full border border-black flex items-center gap-1 group-hover:bg-black transition-colors">
+                DETAILS <i class="fa-solid fa-circle-arrow-right text-xs"></i>
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ========================================================= -->
+      <!-- ====== SCREEN 3: REDESIGNED TO MATCH REFERENCE IMAGE ==== -->
+      <!-- ========================================================= -->
+      <section style="width: 100vw;" class="h-full h-[100dvh] flex-shrink-0 relative bg-brand overflow-hidden">
+        
+        <!-- TOP HANGING CLOUD HEADER -->
+        <div class="absolute top-0 left-0 right-0 bg-white border-b-4 border-black rounded-b-[40px] pt-14 pb-8 px-5 z-20 pointer-events-none">
+           <!-- Scallops / Clouds overlapping the bottom edge -->
+           <div class="absolute -bottom-5 left-6 w-10 h-10 bg-white rounded-full border-b-4 border-black"></div>
+           <div class="absolute -bottom-7 left-1/3 w-14 h-14 bg-white rounded-full border-b-4 border-black"></div>
+           <div class="absolute -bottom-8 left-2/3 -translate-x-1/2 w-16 h-16 bg-white rounded-full border-b-4 border-black"></div>
+           <div class="absolute -bottom-5 right-6 w-10 h-10 bg-white rounded-full border-b-4 border-black"></div>
+           
+           <div class="flex justify-between items-center text-[10px] font-black uppercase text-black mb-3">
+             <span>FOR DEVELOPERS</span>
+             <span>01/03/2026</span>
+           </div>
+           
+           <div class="text-center mt-2">
+             <h2 class="font-syne text-[22px] font-black text-brand leading-none">ANNUAL MEET:</h2>
+             <h1 class="font-syne text-[40px] font-black text-black leading-[0.9] mt-1 tracking-tight flex items-center justify-center gap-1">
+                GAMERS24 <i class="fa-solid fa-sparkles text-accentYellow text-xl mb-2"></i>
+             </h1>
+             <p class="text-[9px] font-bold mt-2 text-black tracking-widest">(PRE-REGISTER)</p>
+           </div>
+        </div>
+
+        <!-- CENTER CHARACTER ILLUSTRATION (Shifted Left) -->
+        <div class="absolute inset-0 z-10 flex items-center justify-center pt-24 pr-16 pointer-events-none">
+            <img src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcRWVNAIkGp55nVK0MZXikvmAtVaq61p7K1idlCKQCYMk0I1K1k5" 
+                 alt="Character" 
+                 class="w-[110%] h-[110%] max-w-none object-contain blend-multiply filter contrast-125 scale-110 drop-shadow-2xl -translate-x-4">
+        </div>
+
+        <!-- MASSIVE RIGHT SIDE NUMBER -->
+        <div class="absolute right-6 top-[55%] -translate-y-1/2 text-right z-20 pointer-events-none">
+           <div class="font-syne text-[100px] leading-[0.8] font-black text-white">23</div>
+           <div class="text-[10px] font-black uppercase text-white tracking-widest mt-1">LECTURERS</div>
+        </div>
+
+        <!-- BOTTOM LEFT EVENT TEXT -->
+        <div class="absolute bottom-12 left-6 text-white text-[9px] font-bold leading-[1.6] tracking-wider z-20 pointer-events-none">
+           <div class="text-white/90 mb-1">EVENT PLAN:</div>
+           <div>BEGINNING — 12:00 AM</div>
+           <div>COFFEE BREAK — 15:00 PM</div>
+           <div>SUMMARY — 18:00 PM</div>
+           <div class="mt-4 text-accentYellow font-black uppercase text-[10px]">SNACKS INCLUDED</div>
+        </div>
+
+        <!-- BOTTOM RIGHT QUARTER-CIRCLE BUTTON -->
+        <button onclick="registerModal()" class="pointer-events-auto absolute -bottom-1 -right-1 w-[130px] h-[130px] bg-white border-t-[3.5px] border-l-[3.5px] border-black rounded-tl-[100px] z-30 flex flex-col justify-end items-end p-5 cursor-pointer hover:bg-accentYellow group transition-colors duration-300">
+           <span class="text-[11px] font-black uppercase text-black flex items-center gap-1.5 group-hover:-translate-x-2 group-hover:-translate-y-2 transition-transform duration-300">
+             DETAILS 
+             <div class="bg-black text-white w-[18px] h-[18px] rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-arrow-right text-[9px]"></i>
+             </div>
+           </span>
+        </button>
+
+      </section>
+
+    </div>
+
+  </main>
+
+
+  <!-- NAVIGATION DOTS -->
+  <footer class="absolute bottom-3 left-0 right-0 z-30 flex justify-center items-center gap-2 pointer-events-auto mix-blend-difference">
+    <button onclick="goToSlide(0)" id="dot-0" class="w-7 h-2.5 rounded-full bg-white border border-transparent transition-all duration-300 shadow-md cursor-pointer"></button>
+    <button onclick="goToSlide(1)" id="dot-1" class="w-2.5 h-2.5 rounded-full bg-white/50 border border-transparent transition-all duration-300 cursor-pointer"></button>
+    <button onclick="goToSlide(2)" id="dot-2" class="w-2.5 h-2.5 rounded-full bg-white/50 border border-transparent transition-all duration-300 cursor-pointer"></button>
+  </footer>
+
+
+  <div id="gameModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300 select-none">
+    <div id="modalCard" class="bg-white rounded-3xl border-4 border-black p-6 w-full max-w-sm text-black shadow-[8px_8px_0px_#FF3B00] transform scale-90 transition-transform duration-300">
+      
+      <div class="flex justify-between items-center mb-3">
+        <span id="modalBadge" class="text-[10px] font-black uppercase bg-brand text-white px-3 py-1 rounded-full border border-black">
+          MODE DETAILS
+        </span>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-black text-white font-black text-xs flex items-center justify-center spring-btn cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <h3 id="modalTitle" class="font-syne text-2xl font-black uppercase text-black mb-2 leading-none">
+        QUICK LUDO STAR
+      </h3>
+
+      <p id="modalBody" class="text-xs font-bold text-gray-700 leading-relaxed mb-4">
+        Play fast-paced 5-minute matches with double dice velocity, instant multipliers, and instant cash prizes!
+      </p>
+
+      <!-- Mini Dice Roll Tester -->
+      <div class="bg-gray-100 p-3 rounded-2xl border-2 border-black text-center mb-4">
+        <div class="text-[9px] font-black uppercase text-gray-500 mb-1">TEST YOUR DICE LUCK</div>
+        <div id="diceVal" class="text-4xl my-1 animate-bounce">🎲</div>
+        <button onclick="rollDice()" class="bg-accentYellow hover:bg-brand hover:text-white text-black font-black text-xs px-4 py-2 rounded-full border-2 border-black shadow-[2px_2px_0px_#000] spring-btn cursor-pointer">
+          ROLL DICE!
+        </button>
+      </div>
+
+      <button onclick="closeModal()" class="w-full bg-black text-white font-black text-xs uppercase py-3 rounded-full border-2 border-black shadow-[3px_3px_0px_#FFE600] spring-btn cursor-pointer hover:bg-brand">
+        START MATCH NOW!
+      </button>
+    </div>
+  </div>
+
+
+  <script>
+    // State variables
+    let activeSlide = 0;
+    const maxSlides = 3;
+    let audioCtx = null;
+    let isSoundOn = false;
+    let bgmInterval = null;
+
+    // Viewport Desktop Detector
+    function checkViewportWidth() {
+      const w = window.innerWidth;
+      const warning = document.getElementById('desktopWarning');
+      const valSpan = document.getElementById('windowWidthVal');
+      valSpan.innerText = w + 'px';
+
+      if (w > 520) {
+        warning.classList.remove('hidden');
+        warning.classList.add('flex');
+      } else {
+        warning.classList.add('hidden');
+        warning.classList.remove('flex');
+      }
+    }
+
+    function forceMobilePreview() {
+      document.getElementById('desktopWarning').classList.add('hidden');
+    }
+
+    window.addEventListener('resize', checkViewportWidth);
+    checkViewportWidth();
+
+    // Slide Carousel Engine (Now using strict vw units for guaranteed layout)
+    function goToSlide(idx) {
+      activeSlide = idx;
+      const track = document.getElementById('slideTrack');
+      track.style.transform = `translateX(-${activeSlide * 100}vw)`;
+
+      // Indicators
+      for (let i = 0; i < maxSlides; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (i === activeSlide) {
+          dot.className = "w-7 h-2.5 rounded-full bg-white border border-transparent transition-all duration-300 shadow-md cursor-pointer";
+        } else {
+          dot.className = "w-2.5 h-2.5 rounded-full bg-white/50 border border-transparent transition-all duration-300 cursor-pointer";
+        }
+      }
+
+      playSfx(520 + idx * 100, 'sine', 0.08);
+    }
+
+    // Swipe & Mouse Drag Handling (Replaced touch-only with pointer events!)
+    let startX = 0;
+    let endX = 0;
+    const appContainer = document.getElementById('appContainer');
+
+    appContainer.addEventListener('pointerdown', (e) => {
+      // Ignore if clicking on buttons
+      if(e.target.closest('button')) return; 
+      startX = e.clientX;
+    });
+
+    appContainer.addEventListener('pointerup', (e) => {
+      if(e.target.closest('button')) return;
+      endX = e.clientX;
+      handleSwipe();
+    });
+
+    function handleSwipe() {
+      const diff = startX - endX;
+      if (Math.abs(diff) > 45) { // Minimum swipe distance
+        if (diff > 0 && activeSlide < maxSlides - 1) {
+          goToSlide(activeSlide + 1); // Swipe Left
+        } else if (diff < 0 && activeSlide > 0) {
+          goToSlide(activeSlide - 1); // Swipe Right
+        }
+      }
+    }
+
+    // Arrow keys fallback
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' && activeSlide < maxSlides - 1) goToSlide(activeSlide + 1);
+      if (e.key === 'ArrowLeft' && activeSlide > 0) goToSlide(activeSlide - 1);
+    });
+
+    // Web Audio Synthesizer
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleSound() {
+      initAudio();
+      isSoundOn = !isSoundOn;
+      const icon = document.getElementById('audioIcon');
+      const btn = document.getElementById('audioBtn');
+
+      if (isSoundOn) {
+        icon.className = "fa-solid fa-volume-high text-xs text-accentYellow";
+        btn.classList.add('bg-brand');
+        startBgm();
+      } else {
+        icon.className = "fa-solid fa-volume-xmark text-xs";
+        btn.classList.remove('bg-brand');
+        stopBgm();
+      }
+    }
+
+    const melody = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23, 392.00, 523.25];
+    let noteIdx = 0;
+
+    function startBgm() {
+      if (bgmInterval) clearInterval(bgmInterval);
+      bgmInterval = setInterval(() => {
+        if (!isSoundOn || !audioCtx) return;
+        const freq = melody[noteIdx % melody.length];
+        playSfx(freq, 'square', 0.08, 0.04);
+        noteIdx++;
+      }, 220);
+    }
+
+    function stopBgm() {
+      if (bgmInterval) clearInterval(bgmInterval);
+    }
+
+    function playSfx(freq, type = 'sine', duration = 0.1, vol = 0.12) {
+      if (!isSoundOn || !audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn("Audio Context error", e);
+      }
+    }
+
+    // Auto-init audio context on first screen tap
+    document.body.addEventListener('pointerdown', () => { initAudio(); }, { once: true });
+
+    // Modal Details Engine
+    function openModal(type) {
+      initAudio();
+      playSfx(800, 'triangle', 0.15);
+
+      const modal = document.getElementById('gameModal');
+      const card = document.getElementById('modalCard');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      const badge = document.getElementById('modalBadge');
+
+      if (type === 'QUICK LUDO') {
+        badge.innerText = "FAST ARENA";
+        title.innerText = "QUICK LUDO STAR";
+        body.innerText = "Fast 5-minute action mode with double dice velocity, quick token paths, and instant reward payouts!";
+      } else {
+        badge.innerText = "1v1 COMBAT";
+        title.innerText = "COMBAT LUDO ARENA";
+        body.innerText = "Head-to-head competitive Ludo duel! Knock out opponent tokens, control strategic board squares, and win points.";
+      }
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      card.classList.remove('scale-90');
+      card.classList.add('scale-100');
+    }
+
+    function closeModal() {
+      playSfx(300, 'sine', 0.1);
+      const modal = document.getElementById('gameModal');
+      const card = document.getElementById('modalCard');
+
+      card.classList.remove('scale-100');
+      card.classList.add('scale-90');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function rollDice() {
+      initAudio();
+      const val = document.getElementById('diceVal');
+      const faces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+      let count = 0;
+      const t = setInterval(() => {
+        const r = Math.floor(Math.random() * 6);
+        val.innerText = faces[r];
+        playSfx(350 + r * 90, 'sawtooth', 0.04, 0.08);
+        count++;
+        if (count > 8) {
+          clearInterval(t);
+          playSfx(1100, 'sine', 0.25, 0.15);
+        }
+      }, 60);
+    }
+
+    function registerModal() {
+      openModal('KING MASTERS');
+      document.getElementById('modalBadge').innerText = "VIP MASTERS ARENA";
+      document.getElementById('modalTitle').innerText = "GAMERS24 SUMMIT";
+      document.getElementById('modalBody').innerText = "You have initiated your VIP pre-registration for the exclusive Gamers24 annual meetup. Expect an email with your entry badge soon!";
+    }
+  </script>
+  <script src="./pwa.js"></script>
 </body>
 </html>

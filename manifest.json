@@ -1,21 +1,21 @@
 {
-  "name": "Zuma",
-  "short_name": "Zuma",
+  "name": "LUDO STAR - Fullscreen Mobile Experience",
+  "short_name": "LUDO STAR - Fullscreen Mobile Experience",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#f8fafc",
-  "description": "A minimal soft-body squishy spring physics PWA skeleton.",
+  "background_color": "#fff",
+  "theme_color": "#fff",
+  "description": "App description",
   "icons": [
     {
-      "src": "./zuma.jpg",
+      "src": "././9666877.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "./zuma.jpg",
+      "src": "././9666877.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     }
   ]
 }
