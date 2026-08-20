@@ -1,0 +1,21 @@
+{
+"name": "Squishy Minimal PWA",
+"short_name": "Squishy",
+"start_url": "./index.html",
+"display": "standalone",
+"background_color": "#f8fafc",
+"theme_color": "#f8fafc",
+"description": "A minimal soft-body squishy spring physics PWA skeleton.",
+"icons": [
+{
+"src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzI1NjNlYiIvPjwvc3ZnPg==",
+"sizes": "192x192",
+"type": "image/svg+xml"
+},
+{
+"src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzI1NjNlYiIvPjwvc3ZnPg==",
+"sizes": "512x512",
+"type": "image/svg+xml"
+}
+]
+}
